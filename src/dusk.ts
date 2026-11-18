@@ -23,6 +23,8 @@ import {
   const PARTICLE_COUNT = 12;
   const ORB_MIN = 0.07;
   const ORB_MAX = 0.2;
+  const DISTANCE = 1.0; // orb user se kitni door (meter)
+  const BACKGROUND = 0x0a0f24; // dark dusk
   
   const TIP_NAMES = [
     'index-finger-tip',
@@ -90,7 +92,7 @@ import {
       const ctx = this.ctx;
       const c = ctx.canvas;
       ctx.clearRect(0, 0, c.width, c.height);
-      ctx.fillStyle = 'rgba(10, 14, 30, 0.6)';
+      ctx.fillStyle = 'rgba(20, 28, 60, 0.7)';
       ctx.fillRect(0, 0, c.width, c.height);
       const total = lines.reduce((s, l) => s + l.size * 1.35, 0);
       let y = (c.height - total) / 2;
@@ -171,6 +173,7 @@ import {
     private releasedCount = 0;
   
     init(): void {
+      this.world.scene.background = new Color(BACKGROUND);
       this.world.scene.add(this.root);
   
       const sphereGeo = new SphereGeometry(1, 48, 32);
@@ -180,7 +183,7 @@ import {
       this.root.add(this.halo);
   
       this.label = new Label(0.7, 0.28);
-      this.label.mesh.position.set(0, 0.46, 0);
+      this.label.mesh.position.set(0, 0.5, 0);
       this.root.add(this.label.mesh);
   
       const pGeo = new SphereGeometry(0.018, 16, 12);
@@ -289,8 +292,8 @@ import {
         this.fwd.set(0, 0, -1);
       }
       this.fwd.normalize();
-      this.target.copy(this.headPos).addScaledVector(this.fwd, 0.75);
-      this.target.y = this.headPos.y - 0.12;
+      this.target.copy(this.headPos).addScaledVector(this.fwd, DISTANCE);
+      this.target.y = this.headPos.y - 0.1;
       if (smooth) {
         this.root.position.lerp(this.target, 0.1);
       } else {
