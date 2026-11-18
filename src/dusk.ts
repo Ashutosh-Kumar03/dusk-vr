@@ -19,11 +19,11 @@ import {
   const HOLD_TO_START = 1.0; // hands itne seconds dikhein toh session start
   const PINCH_DIST = 0.03; // thumb-tip aur index-tip ki doori (meter)
   const PINCH_MIDDLE_MIN = 1.4; // fist ko pinch na samjhe
-  const GRAB_RADIUS = 0.1; // pinch particle ke itna paas ho toh release
+  const GRAB_RADIUS = 0.15; // pinch particle ke itna paas ho toh release
   const PARTICLE_COUNT = 12;
-  const ORB_MIN = 0.07;
-  const ORB_MAX = 0.2;
-  const DISTANCE = 1.0; // orb user se kitni door (meter)
+  const ORB_MIN = 0.06;
+  const ORB_MAX = 0.15;
+  const DISTANCE = 0.65; // orb user se kitni door (meter)
   const BACKGROUND = 0x0a0f24; // dark dusk
   
   const TIP_NAMES = [
@@ -116,6 +116,7 @@ import {
   
   export class DuskSystem extends createSystem({}) {
     private root = new Group();
+    private bg = new Color(BACKGROUND);
     private orb!: Mesh;
     private halo!: Mesh;
     private orbMat = new MeshBasicMaterial({ color: 0x2f4bd8 });
@@ -173,7 +174,7 @@ import {
     private releasedCount = 0;
   
     init(): void {
-      this.world.scene.background = new Color(BACKGROUND);
+      this.world.scene.background = this.bg;
       this.world.scene.add(this.root);
   
       const sphereGeo = new SphereGeometry(1, 48, 32);
@@ -182,15 +183,15 @@ import {
       this.root.add(this.orb);
       this.root.add(this.halo);
   
-      this.label = new Label(0.7, 0.28);
-      this.label.mesh.position.set(0, 0.5, 0);
+      this.label = new Label(0.5, 0.2);
+      this.label.mesh.position.set(0, 0.36, 0);
       this.root.add(this.label.mesh);
   
-      const pGeo = new SphereGeometry(0.018, 16, 12);
+      const pGeo = new SphereGeometry(0.014, 16, 12);
       for (let i = 0; i < PARTICLE_COUNT; i++) {
         const a = MathUtils.randFloat(-1.2, 1.2);
         const e = MathUtils.randFloat(-0.5, 0.5);
-        const r = MathUtils.randFloat(0.38, 0.55);
+        const r = MathUtils.randFloat(0.26, 0.38);
         const base = new Vector3(
           r * Math.sin(a) * Math.cos(e),
           r * Math.sin(e) - 0.05,
@@ -409,6 +410,11 @@ import {
     }
   
     update(delta: number, time: number): void {
+      // scene ka halka background ko override karne se rokta hai
+      if (this.world.scene.background !== this.bg) {
+        this.world.scene.background = this.bg;
+      }
+  
       const dt = Math.min(delta, 0.1);
       this.readHand(0);
       this.readHand(1);
@@ -465,9 +471,8 @@ import {
         }
         this.holdT = tracked ? this.holdT + dt : 0;
         this.label.set([
-          { text: 'Dusk', size: 72 },
-          { text: 'Hold your hands up to begin', size: 40 },
-          { text: '(desktop: press Enter, hold Space = open)', size: 28, color: '#9fb4ff' },
+          { text: 'Dusk', size: 80 },
+          { text: 'Hold your hands up to begin', size: 44 },
         ]);
         if (this.holdT >= HOLD_TO_START || this.enterPressed) {
           this.enterPressed = false;
@@ -477,9 +482,9 @@ import {
         this.sessionT += dt;
         this.trackBreath(dt);
         this.label.set([
-          { text: this.dir > 0 ? 'Breathe in' : 'Breathe out', size: 72 },
+          { text: this.dir > 0 ? 'Breathe in' : 'Breathe out', size: 76 },
           { text: 'Open hands = in   |   Close hands = out', size: 34, color: '#9fb4ff' },
-          { text: formatTime(SESSION_SECONDS - this.sessionT), size: 44 },
+          { text: formatTime(SESSION_SECONDS - this.sessionT), size: 48 },
         ]);
         if (this.sessionT >= SESSION_SECONDS) {
           this.phase = 'summary';
